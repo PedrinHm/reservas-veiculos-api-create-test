@@ -13,8 +13,8 @@ const db = mysql.createPool({
     connectTimeout: 30000
 });
 
-db.getConnection()
+/* db.getConnection()
     .then(() => console.log('Conexão com o banco de dados bem-sucedida'))
-    .catch((err) => console.error('Erro ao conectar ao banco de dados:', err.message));
+    .catch((err) => console.error('Erro ao conectar ao banco de dados:', err.message)); */
 
 module.exports = db;
