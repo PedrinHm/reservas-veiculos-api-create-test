@@ -1,5 +1,6 @@
 // app.js
 const express = require('express');
+const cors = require("cors");
 const bodyParser = require('body-parser');
 const dotenv = require('dotenv');
 const vehicleRoutes = require('./routes/vehicles');
@@ -11,6 +12,11 @@ dotenv.config();
 
 const app = express();
 app.use(bodyParser.json());
+
+app.use(cors({ origin: "*" }));
+
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: "50mb" }));
 
 app.use('/vehicles', vehicleRoutes);
 app.use('/reservations', reservationRoutes);
@@ -32,11 +38,11 @@ const testDbConnection = async () => {
 
 testDbConnection();
 
-if (process.env.NODE_ENV !== 'test') {
+/* if (process.env.NODE_ENV !== 'test') {
     const PORT = process.env.PORT || 3000;
     app.listen(PORT, () => {
         console.log(`Servidor rodando na porta ${PORT}`);
     });
-}
+} */
 
 module.exports = app;

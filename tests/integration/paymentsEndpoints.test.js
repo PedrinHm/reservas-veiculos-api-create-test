@@ -38,11 +38,11 @@ beforeAll(async () => {
     )
   `);
 
-  await db.query('SET FOREIGN_KEY_CHECKS = 0');
+  /* await db.query('SET FOREIGN_KEY_CHECKS = 0');
   await db.query('DELETE FROM payments');
   await db.query('DELETE FROM reservations');
   await db.query('DELETE FROM vehicles');
-  await db.query('SET FOREIGN_KEY_CHECKS = 1');
+  await db.query('SET FOREIGN_KEY_CHECKS = 1'); */
 
   const [vehicleResult] = await db.query(`
     INSERT INTO vehicles (marca, modelo, ano, placa) VALUES
