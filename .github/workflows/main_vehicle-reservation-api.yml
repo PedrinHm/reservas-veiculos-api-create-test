@@ -59,4 +59,4 @@ jobs:
           app-name: 'Vehicle-Reservation-Api'
           slot-name: 'Production'
           package: .
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_8275B326186F421A9B0FDAF00D30FC1B }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_AEAA1D0EBDF54A92A8243F2FE2A1727F }}
