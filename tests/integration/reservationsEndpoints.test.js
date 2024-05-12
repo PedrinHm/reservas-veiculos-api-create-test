@@ -5,7 +5,7 @@ const db = require('../../models/db');
 
 let lastInsertedVehicleId;
 
-beforeAll(async () => {
+async function setupDatabase() {
   await db.query(`
     CREATE TABLE IF NOT EXISTS vehicles (
       id INT AUTO_INCREMENT PRIMARY KEY,
@@ -27,11 +27,6 @@ beforeAll(async () => {
     )
   `);
 
-  /* await db.query('SET FOREIGN_KEY_CHECKS = 0');
-  await db.query('DELETE FROM reservations');
-  await db.query('DELETE FROM vehicles');
-  await db.query('SET FOREIGN_KEY_CHECKS = 1'); */
-
   const [result] = await db.query(`
     INSERT INTO vehicles (marca, modelo, ano, placa) VALUES
     ('Toyota', 'Corolla', 2020, 'ABC-1234'),
@@ -39,45 +34,48 @@ beforeAll(async () => {
   `);
 
   lastInsertedVehicleId = result.insertId;
-});
+}
+
+beforeAll(setupDatabase);
 
 afterAll(async () => {
   await db.end();
 });
 
-describe('Reservations Endpoints', () => {
-  it('should create a new reservation', async () => {
-    const res = await request(app)
-      .post('/reservations')
-      .send({
-        vehicleId: lastInsertedVehicleId,
-        startDate: '2024-05-10',
-        endDate: '2024-05-15'
-      });
-    expect(res.statusCode).toEqual(201);
-    expect(res.body).toHaveProperty('message', 'Reserva criada com sucesso');
-    expect(res.body).toHaveProperty('reservationId');
-  });
+describe('Reservations API', () => {
+  describe('POST /reservations', () => {
+    it('should create a new reservation successfully', async () => {
+      const response = await request(app)
+        .post('/reservations')
+        .send({
+          vehicleId: lastInsertedVehicleId,
+          startDate: '2024-05-10',
+          endDate: '2024-05-15'
+        });
+      expect(response.statusCode).toEqual(201);
+      expect(response.body).toHaveProperty('message', 'Reserva criada com sucesso');
+      expect(response.body).toHaveProperty('reservationId');
+    });
 
-  it('should not create a reservation if vehicle is already booked', async () => {
-    // Criando reserva inicial
-    await request(app)
-      .post('/reservations')
-      .send({
-        vehicleId: lastInsertedVehicleId,
-        startDate: '2024-05-10',
-        endDate: '2024-05-15'
-      });
+    it('should reject a reservation when the vehicle is already booked', async () => {
+      // Attempt to create a conflicting reservation
+      const initialResponse = await request(app)
+        .post('/reservations')
+        .send({
+          vehicleId: lastInsertedVehicleId,
+          startDate: '2024-05-10',
+          endDate: '2024-05-15'
+        });
 
-    // Tentando criar uma nova reserva no mesmo período
-    const res = await request(app)
-      .post('/reservations')
-      .send({
-        vehicleId: lastInsertedVehicleId,
-        startDate: '2024-05-10',
-        endDate: '2024-05-15'
-      });
-    expect(res.statusCode).toEqual(400);
-    expect(res.body).toHaveProperty('message', 'Veículo já reservado para este período');
+      const conflictResponse = await request(app)
+        .post('/reservations')
+        .send({
+          vehicleId: lastInsertedVehicleId,
+          startDate: '2024-05-10',
+          endDate: '2024-05-15'
+        });
+      expect(conflictResponse.statusCode).toEqual(400);
+      expect(conflictResponse.body).toHaveProperty('message', 'Veículo já reservado para este período');
+    });
   });
 });

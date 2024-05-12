@@ -5,7 +5,7 @@ const db = require('../../models/db');
 
 let lastInsertedVehicleId;
 
-beforeAll(async () => {
+async function setupDatabase() {
   await db.query(`
     CREATE TABLE IF NOT EXISTS vehicles (
       id INT AUTO_INCREMENT PRIMARY KEY,
@@ -16,10 +16,6 @@ beforeAll(async () => {
     )
   `);
 
-  /* await db.query('SET FOREIGN_KEY_CHECKS = 0');
-  await db.query('DELETE FROM vehicles');
-  await db.query('SET FOREIGN_KEY_CHECKS = 1'); */
-
   const [result] = await db.query(`
     INSERT INTO vehicles (marca, modelo, ano, placa) VALUES
     ('Toyota', 'Corolla', 2020, 'ABC-1234'),
@@ -27,27 +23,37 @@ beforeAll(async () => {
   `);
 
   lastInsertedVehicleId = result.insertId;
-});
+}
+
+beforeAll(setupDatabase);
 
 afterAll(async () => {
   await db.end();
 });
 
-describe('Vehicles Endpoints', () => {
-  it('should fetch all vehicles', async () => {
-    const res = await request(app).get('/vehicles');
-    expect(res.statusCode).toEqual(200);
+describe('Vehicles API', () => {
+  describe('GET /vehicles', () => {
+    it('should retrieve a list of all vehicles', async () => {
+      const response = await request(app).get('/vehicles');
+      expect(response.statusCode).toEqual(200);
+      expect(response.body).toEqual(expect.any(Array)); // Verifying the structure is an array
+    });
   });
 
-  it('should fetch a vehicle by id', async () => {
-    const res = await request(app).get(`/vehicles/${lastInsertedVehicleId}`);
-    expect(res.statusCode).toEqual(200);
-    expect(res.body).toHaveProperty('marca', 'Toyota');
-  });
+  describe('GET /vehicles/:id', () => {
+    it('should retrieve a specific vehicle by id', async () => {
+      const response = await request(app).get(`/vehicles/${lastInsertedVehicleId}`);
+      expect(response.statusCode).toEqual(200);
+      expect(response.body).toHaveProperty('marca', 'Toyota');
+      expect(response.body).toHaveProperty('modelo', 'Corolla');
+      expect(response.body).toHaveProperty('ano', 2020);
+      expect(response.body).toHaveProperty('placa', 'ABC-1234');
+    });
 
-  it('should return 404 if vehicle not found', async () => {
-    const res = await request(app).get('/vehicles/999');
-    expect(res.statusCode).toEqual(404);
-    expect(res.body).toHaveProperty('message', 'Veículo não encontrado');
+    it('should return a 404 status if the vehicle is not found', async () => {
+      const response = await request(app).get('/vehicles/999'); // Using an unlikely ID to simulate not found
+      expect(response.statusCode).toEqual(404);
+      expect(response.body).toHaveProperty('message', 'Veículo não encontrado');
+    });
   });
 });

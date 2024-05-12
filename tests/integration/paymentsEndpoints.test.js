@@ -65,7 +65,7 @@ afterAll(async () => {
 });
 
 describe('Payments Endpoints', () => {
-  it('should process a credit card payment', async () => {
+  it('should successfully process a payment using a credit card', async () => {
     const res = await request(app)
       .post('/payments')
       .send({
@@ -81,9 +81,11 @@ describe('Payments Endpoints', () => {
     expect(res.statusCode).toEqual(201);
     expect(res.body).toHaveProperty('message', 'Pagamento realizado com sucesso');
     expect(res.body).toHaveProperty('status', 'completed');
+    
+  
   });
 
-  it('should process a boleto payment', async () => {
+  it('should successfully process a payment using a boleto', async () => {
     const res = await request(app)
       .post('/payments')
       .send({
@@ -93,9 +95,10 @@ describe('Payments Endpoints', () => {
     expect(res.statusCode).toEqual(201);
     expect(res.body).toHaveProperty('message', 'Pagamento realizado com sucesso');
     expect(res.body).toHaveProperty('status', 'completed');
+    // Adicione verificações para o boleto aqui, se necessário
   });
 
-  it('should return 400 if payment method is invalid', async () => {
+  it('should return a 400 error for an invalid payment method', async () => {
     const res = await request(app)
       .post('/payments')
       .send({
@@ -104,5 +107,6 @@ describe('Payments Endpoints', () => {
       });
     expect(res.statusCode).toEqual(400);
     expect(res.body).toHaveProperty('message', 'Método de pagamento inválido');
+    // Verificar se nenhuma entrada foi criada no banco de dados
   });
 });
