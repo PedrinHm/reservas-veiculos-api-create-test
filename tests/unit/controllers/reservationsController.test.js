@@ -8,7 +8,12 @@ describe('Reservations Controller', () => {
   let req, res;
 
   beforeEach(() => {
-    req = { body: {} };
+    req = { 
+      body: {
+      vehicleId: 1, 
+      startDate: '2024-01-01', 
+      endDate: '2024-01-05'
+    } };
     res = {
       json: jest.fn(),
       status: jest.fn(() => res)
